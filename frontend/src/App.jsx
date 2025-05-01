@@ -11,7 +11,6 @@ function Layout() {
       <main className="flex-1 flex items-center justify-center p-4">
         <Outlet />
       </main>
-      {showBar && <BottomBar />}
     </div>
   );
 }
@@ -32,8 +31,8 @@ function BottomBar() {
   );
 }
 
-const Intro          = React.lazy(() => import('./pages/Intro'));
-const StateSelect    = React.lazy(() => import('./pages/StateSelect'));
+const Intro = React.lazy(() => import('./pages/Intro'));
+const StateSelect = React.lazy(() => import('./pages/StateSelect'));
 /* -------------  APP ROUTES ------------- */
 export default function App() {
   return (
@@ -41,11 +40,13 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Intro />} />
-          <Route path="state"      element={<StateSelect />}   />
-          <Route path="transport"  element={<TransportScan />} />
-          {/* <Route path="appliances" element={<ApplianceScan />} />
-          <Route path="food"       element={<FoodScan />}      />
-          <Route path="flights"    element={<AirTravel />}     />
+          <Route path="state" element={<StateSelect />} />
+          <Route path="transport" element={<TransportScan />} />
+          <Route path="transport_secundary" element={<SecundaryTransportScan />} />
+          <Route path="appliances" element={<ApplianceScan />} />
+          <Route path="food" element={<FoodScan />} />
+          <Route path="food_secundary" element={<SecundaryFoodScan />} />
+          {/* <Route path="flights"    element={<AirTravel />}     />
           <Route path="results"    element={<Results />}       />
           <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Route>
@@ -55,8 +56,10 @@ export default function App() {
 }
 
 /* -------------  LAZY‑LOADED PAGES ------------- */
-const TransportScan  = React.lazy(() => import('./pages/TransportScan'));
-// const ApplianceScan  = React.lazy(() => import('./pages/ApplianceScan'));
-// const FoodScan       = React.lazy(() => import('./pages/FoodScan'));
+const TransportScan = React.lazy(() => import('./pages/TransportScan'));
+const SecundaryTransportScan = React.lazy(() => import('./pages/SecundaryTransportScan'));
+const ApplianceScan = React.lazy(() => import('./pages/ApplianceScan'));
+const FoodScan = React.lazy(() => import('./pages/FoodScan'));
+const SecundaryFoodScan = React.lazy(() => import('./pages/SecundaryFoodScan'));
 // const AirTravel      = React.lazy(() => import('./pages/AirTravel'));
 // const Results        = React.lazy(() => import('./pages/Results'));
