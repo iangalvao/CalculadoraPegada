@@ -11,6 +11,7 @@ def home():
 # send this from barcode handler
 @app.route("/scan/<code>")
 def simulate_scan(code):
+    print(f"Simulating scan with code: {code}")
     socketio.emit("barcode_scanned", {"code": code})
     return {"status": "sent"}
     
