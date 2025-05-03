@@ -2,7 +2,7 @@ from evdev import InputDevice, categorize, ecodes
 import requests
 
 # Altere para o seu dispositivo!
-device_path = "/dev/input/event14"
+device_path = "/dev/input/event7"
 dev = InputDevice(device_path)
 
 buffer = ""
@@ -63,6 +63,9 @@ key_map = {
     57: "space",
 }
 
+mapping = {
+    "10000229":"LEGUMES"
+}
 
 for event in dev.read_loop():
     if event.type == ecodes.EV_KEY:
@@ -79,6 +82,11 @@ for event in dev.read_loop():
                 if buffer:
                     # strip and uppercase
                     buffer = buffer.strip().upper()
+                    if buffer not in mapping.keys():
+                        print ("warning, buffer not in mapping, sending DUMMY")
+                        buffer = "DUMMY CODE"
+                    else:
+                        buffer = mapping[buffer]
                     print(f"Enviando código: {buffer}")
                     try:
                         requests.get(f"http://localhost:5174/scan/{buffer}")

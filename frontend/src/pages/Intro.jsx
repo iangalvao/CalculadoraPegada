@@ -38,14 +38,14 @@ export default function Intro() {
         <div className="border-2 border-[rgb(80,255,40)] p-6 flex items-center h-1/3 justify-left">
           <div>
             {/* The text in this div should be centralized vertically and left-aligned */}
-            <h1 className="text-6xl font-extrabold ml-10">PEGADA DE CARBONO:</h1>
-            <h2 className="text-6xl font-semibold ml-10">QUANTO VOCÊ EMITE<br></br> SEM PERCEBER?</h2>
+            <h1 className="text-4xl font-extrabold ml-10">PEGADA DE CARBONO:</h1>
+            <h2 className="text-4xl font-semibold ml-10">QUANTO VOCÊ EMITE<br></br> SEM PERCEBER?</h2>
           </div>
         </div>
         {/* Bottom-left. This should have a good margin for the text. */}
 
         <div className="border-2 border-[rgb(80,255,40)] p-6 h-2/3 flex items-center justify-center">
-          <div className="text-4xl font-medium space-y-10 m ml-10 mr-10">
+          <div className="text-2xl font-medium space-y-10 m ml-10 mr-10">
             <p>
               Produzir e transportar o que consumimos tem um custo para o planeta: a emissão de gases do efeito estufa.
             </p>
