@@ -64,8 +64,29 @@ key_map = {
 }
 
 mapping = {
-    "10000229":"LEGUMES"
+    "10000229":"LEGUMES",
+    "10000113":"AIR-FRIER",
+    "10000090":"AQUECEDOR",
+    "10000175":"ARROZ",
+    "10000007":"AVIÃO",
+    "10000038":"BICICLETA",
+    "10000137":"CARNE DE BOI",
+    "10000144":"CARNE DE PORCO",
+    "10000014":"CARRO",
+    "10000076":"CHUVEIRO ELÉTRICO",
+    "10000083":"DESKTOP",
+    "10000182":"FEIJÃO",
+    "10000151":"FRANGO",
+    "10000212":"FRUTAS",
+    "10000052":"GELADEIRA",
+    "10000120":"LAVA LOUÇAS ",
+    "10000069":"NOTEBOOK",
+    "10000021":"ONIBUS",
+    "10000168":"PEIXE",
+    "10000199":"SALADA",
+    "10000045":"TELEVISÃO"- 
 }
+
 
 for event in dev.read_loop():
     if event.type == ecodes.EV_KEY:
