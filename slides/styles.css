@@ -1,0 +1,25 @@
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  h1 {
+    color: #3B82F6;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  .desc {
+    color: #10B981;
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .co2 {
+    color: #FFFFFF;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  img {
+    margin-top: 2rem;
+    max-height: 200px;
+  }
