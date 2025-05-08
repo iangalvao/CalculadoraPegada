@@ -1,67 +1,39 @@
-from evdev import InputDevice, categorize, ecodes
+from evdev import InputDevice, list_devices
 import requests
 
-# Altere para o seu dispositivo!
-device_path = "/dev/input/event7"
-dev = InputDevice(device_path)
+# Identificador do seu leitor (nome parcial do dispositivo)
+ALVO = "HID 28e9:0380"  # ou apenas "28e9"
+
+# Busca o dispositivo correspondente
+devices = [InputDevice(path) for path in list_devices()]
+leitor = None
+
+for dev in devices:
+    if ALVO.lower() in dev.name.lower():
+        leitor = dev
+        break
+
+if not leitor:
+    print(f"Dispositivo contendo '{ALVO}' não encontrado.")
+    exit(1)
+
+print(f"Usando dispositivo: {leitor.name} ({leitor.path})")
+
+# Mapeamento de scancodes para caracteres (sem shift)
+key_map = {
+    2: '1', 3: '2', 4: '3', 5: '4', 6: '5',
+    7: '6', 8: '7', 9: '8', 10: '9', 11: '0',
+    16: 'q', 17: 'w', 18: 'e', 19: 'r', 20: 't',
+    21: 'y', 22: 'u', 23: 'i', 24: 'o', 25: 'p',
+    30: 'a', 31: 's', 32: 'd', 33: 'f', 34: 'g',
+    35: 'h', 36: 'j', 37: 'k', 38: 'l',
+    44: 'z', 45: 'x', 46: 'c', 47: 'v', 48: 'b',
+    49: 'n', 50: 'm',
+    14: 'backspace',
+    28: 'enter',
+}
 
 buffer = ""
-print(f"Escutando leitor em {device_path}...")
-key_map = {
-    # números
-    2: "1",
-    3: "2",
-    4: "3",
-    5: "4",
-    6: "5",
-    7: "6",
-    8: "7",
-    9: "8",
-    10: "9",
-    11: "0",
-    # letras (sem shift)
-    16: "q",
-    17: "w",
-    18: "e",
-    19: "r",
-    20: "t",
-    21: "y",
-    22: "u",
-    23: "i",
-    24: "o",
-    25: "p",
-    30: "a",
-    31: "s",
-    32: "d",
-    33: "f",
-    34: "g",
-    35: "h",
-    36: "j",
-    37: "k",
-    38: "l",
-    44: "z",
-    45: "x",
-    46: "c",
-    47: "v",
-    48: "b",
-    49: "n",
-    50: "m",
-    # símbolos básicos
-    12: "-",
-    13: "=",
-    26: "[",
-    27: "]",
-    39: ";",
-    40: "'",
-    41: "`",
-    51: ",",
-    52: ".",
-    53: "/",
-    # ações
-    14: "backspace",
-    28: "enter",
-    57: "space",
-}
 
 mapping = {
     "10000229":"LEGUMES",
@@ -84,39 +56,34 @@ mapping = {
     "10000021":"ONIBUS",
     "10000168":"PEIXE",
     "10000199":"SALADA",
-    "10000045":"TELEVISÃO"- 
+    "10000045":"TELEVISÃO"
 }
 
 
-for event in dev.read_loop():
-    if event.type == ecodes.EV_KEY:
-        key_event = categorize(event)
-        if key_event.keystate == key_event.key_down:
-            code = key_event.scancode
-            print(f"Scancode: {code}")
-            char = key_map.get(code, "")
+# Loop de leitura dos eventos
+for event in leitor.read_loop():
+    if event.type == 1:  # EV_KEY
+        if event.value == 1:  # Key down
+            code = event.code
+            char = key_map.get(code)
+
             if not char:
-                print(f"Scancode {code} não mapeado.")
                 continue
-            print(f"Caractere: {char}")
+
             if char == "enter":
                 if buffer:
-                    # strip and uppercase
-                    buffer = buffer.strip().upper()
-                    if buffer not in mapping.keys():
-                        print ("warning, buffer not in mapping, sending DUMMY")
-                        buffer = "DUMMY CODE"
+                    if buffer in mapping:
+                        barcode = mapping[buffer]
+                        print(f"Enviando: {barcode}")
                     else:
-                        buffer = mapping[buffer]
-                    print(f"Enviando código: {buffer}")
+                        print(f"Código não encontrado: {barcode}")
+                        continue
                     try:
-                        requests.get(f"http://localhost:5174/scan/{buffer}")
+                        requests.get(f"http://localhost:5174/scan/{barcode}")
                     except Exception as e:
                         print(f"Erro ao enviar: {e}")
-                buffer = ""
+                    buffer = ""
             elif char == "backspace":
                 buffer = buffer[:-1]
-                print(f"Buffer: {buffer}")
             else:
                 buffer += char
-                print(f"Buffer: {buffer}")

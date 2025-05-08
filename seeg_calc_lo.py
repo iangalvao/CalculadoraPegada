@@ -32,33 +32,32 @@ def _connect():
     _loader = _ctx.ServiceManager.createInstanceWithContext(
         "com.sun.star.frame.Desktop", _ctx)
 
-def _open_doc():
-    global _doc
-    if _doc and not _doc.isDisposed():
-        return
-    props = (PropertyValue("Hidden", 0, True, 0),)
-    _doc  = _loader.loadComponentFromURL(FILE, "_blank", 0, props)
-
+        
 def calculate(inputs: dict) -> dict:
-    """Thread‑safe call: pass a dict of user inputs, get results as dict."""
     with _lock:
-        _connect()
-        _open_doc()
+        _connect()                          # still reuse the UNO connection
 
-        sheet = _doc.Sheets["CALCULADORA"]
+        # open a NEW doc for this request
+        props = (PropertyValue("Hidden", 0, True, 0),)
+        doc = _loader.loadComponentFromURL(FILE, "_blank", 0, props)
+        print(inputs)
 
-        # --- Push inputs ---------------------------------------------------
-        sheet["B4" ].String = inputs["estado"]      # e.g. "SP"
-        sheet["B20" ].Value  = inputs["pessoas"]     # int
-        sheet["B22"].Value  = inputs["kwh_mes"]     # float
-        # …repeat for every input you need
+        sheet = doc.Sheets["CALCULADORA"]
+        sheet["B4"].String  = inputs["estado"]
+        sheet["B20"].Value  = 1
+        sheet["B22"].Value  = inputs["kwh_mes"]
+        sheet["B11"].Value  = inputs["gas"]
+        sheet["B39"].Value = inputs["boi"]
+        sheet["B41"].Value = inputs["porco"]
+        sheet["B40"].Value = inputs["frango"]
+        
+        
+        doc.calculateAll()
 
-        _doc.calculateAll()
-
-        # --- Pull results --------------------------------------------------
         result = {
             "total_tCO2": sheet["B79"].Value,
             "elec_tCO2" : sheet["C30"].Value,
-            # add any other output cells you care about
         }
+
+        doc.close(True)                     # OK, we’re done
         return result
