@@ -6,16 +6,24 @@ import Header from '../components/Header';
 import TabsPanel from '../components/TabsPanel';
 import MiddleContent from '../components/MiddleContent';
 import FooterButtons from '../components/FooterButtons';
+import ItemList from '../../items.json';
 
 const categories = ['TRANSPORTE', 'ELETRODOMÉSTICOS', 'ALIMENTAÇÃO'];
 
-export default function SecundaryTransportScan() {
-    const { answers, update, add_value, remove_value } = useCalc();
+export default function FoodScan() {
+    const { answers, update } = useCalc();
     const selected = answers.food;
     const navigate = useNavigate();
 
     useEffect(() => {
-        socket.on('barcode_scanned', (data) => update('food', data.code));
+        const handleScan = (data) => {
+            if (ItemList.includes(data.code)) {
+                update('food', data.code);
+            } else {
+                console.log(`${data.code} is not on the list`);
+            }
+        };
+        socket.on('barcode_scanned', handleScan);
         return () => socket.off('barcode_scanned');
     }, [update]);
 
@@ -26,7 +34,7 @@ export default function SecundaryTransportScan() {
             <MiddleContent
                 prompt="Qual proteína você mais come? Aponte o leitor!"
                 selected={selected}
-                onClear={(item) => update('food', null)}
+                onClear={() => update('food', null)}
             />
             <FooterButtons
                 selected={selected}

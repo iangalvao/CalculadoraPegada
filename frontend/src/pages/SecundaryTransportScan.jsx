@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import TabsPanel from '../components/TabsPanel';
 import MiddleContent from '../components/MiddleContent';
 import FooterButtons from '../components/FooterButtons';
+import ItemList from '../../items.json';
 
 const categories = ['TRANSPORTE', 'ELETRODOMÉSTICOS', 'ALIMENTAÇÃO'];
 
@@ -15,9 +16,16 @@ export default function SecundaryTransportScan() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        socket.on('barcode_scanned', (data) => add_value('secundary_transport', data.code));
+        const handleScan = (data) => {
+            if (ItemList.includes(data.code)) {
+                add_value('secundary_transport', data.code);
+            } else {
+                console.log(`${data.code} is not on the list`);
+            }
+        };
+        socket.on('barcode_scanned', handleScan);
         return () => socket.off('barcode_scanned');
-    }, [update]);
+    }, [add_value, update]);
 
     return (
         <div className="border-4 border-[rgb(80,255,40)] flex flex-col h-[85vh] w-[93vw] bg-[#5163b8] text-white">

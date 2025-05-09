@@ -1,5 +1,6 @@
 .venv
 .bcsvenv
+package-lock.json
 frontend/package-lock.json
 frontend/node_modules
 frontend/build
