@@ -1,7 +1,7 @@
-// Results.jsx
 import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { useCalc } from '../context/CalculatorContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS, CategoryScale, LinearScale,
   BarElement, Title, Tooltip, Legend
@@ -10,14 +10,15 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function ResultsPage() {
-  const { answers } = useCalc();       // answers comes from your form context
-  const [result, setResult] = useState(null);   // { total_tCO2, elec_tCO2, ... }
-  const [error, setError] = useState(null);
+  const { answers, resetAnswers } = useCalc();
 
-  /* ------------------------------------------------------------------ */
-  /* 1. Hit backend as soon as answers are ready                         */
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate(); // <-- for navigation
+
   useEffect(() => {
-    if (!answers) return;              // wait until questionnaire is filled
+    if (!answers) return;
+
     const payload = {
       estado: answers.estado,
       transporte: answers.transporte,
@@ -25,11 +26,9 @@ export default function ResultsPage() {
       appliances: answers.appliances,
       food: answers.food,
       secundary_food: answers.secundary_food
-
-      // add the rest of the fields you mapped in seeg_calc_lo.py
     };
 
-    fetch('http://10.50.4.159:5174/footprint', {   // ← or :8080 if you skip proxy
+    fetch('http://10.50.4.159:5174/footprint', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -38,20 +37,17 @@ export default function ResultsPage() {
       .then(data => setResult(data))
       .catch(err => setError(err.message));
   }, [answers]);
-  /* ------------------------------------------------------------------ */
-
-  /* 2. Prepare dynamic values for UI                                   */
   const total = result?.total_tCO2?.toFixed(1) ?? '...';
-  const elec = result?.elec_tCO2 ?? 0;
+
   const graphData = {
-    labels: ['Você', 'Média', 'Melhor', 'Pior', 'Meta 2030'],
+    labels: ['Você', 'Média', 'Meta 2030'],
     datasets: [{
       label: 'TonCO₂/ano',
-      data: [result?.total_tCO2 ?? 0, 10, 2, 100, 1.5],
+      data: [result?.total_tCO2 ?? 0, 10, 1.5],
       backgroundColor: '#00ff90',
     }],
   };
-
+  
   const graphOptions = {
     responsive: true,
     plugins: {
@@ -63,11 +59,12 @@ export default function ResultsPage() {
       x: { ticks: { color: 'white' }, grid: { color: '#444' } }
     }
   };
-
-  /* 3. Render                                                         */
+  const handleRestart = () => {
+    resetAnswers();
+    navigate("/");
+  };
   return (
     <div className="flex flex-col h-screen w-screen bg-[#5864a3] text-white p-4">
-      {/* Headline */}
       <div className="h-1/3 w-full border-2 border-green-500 flex items-center justify-center text-4xl font-bold">
         {error
           ? <>ERRO: {error}</>
@@ -75,29 +72,30 @@ export default function ResultsPage() {
         }
       </div>
 
-      {/* Bottom half */}
       <div className="h-2/3 w-full flex">
-        {/* Chart */}
         <div className="w-1/2 border-2 border-green-500 p-4">
           <Bar data={graphData} options={graphOptions} />
         </div>
 
-        {/* Details & QR placeholder */}
-        <div className="w-1/2 border-2 border-green-500 p-4 flex flex-col">
+        <div className="w-1/2 border-2 border-green-500 p-4 flex flex-row">
           <div className="flex-grow flex">
-            <div className="w-3/4 p-4 text-lg space-y-4">
-              <h2 className="text-4xl font-bold">PARA SABER MAIS:</h2>
-              <p className="text-2xl">
-                <strong>Eletricidade:</strong> {elec.toFixed(2)} t CO₂/ano vindo da conta de luz
-              </p>
-              {/* add more breakdowns */}
+            <div className="w-3/4 flex items-center justify-center">
+              <img src="/public/seeg.png" alt="SEEG Logo" className="w-full h-auto" />
             </div>
-            <div className="w-1/4 flex items-center justify-center">
-              <p className="text-2xl">QRCODE</p>
-            </div>
+                  <div className="mt-4 flex justify-center">
+        <button 
+          onClick={handleRestart}
+          className="text-white px-6 py-2 rounded-xl text-xl shadow-lg"
+        >
+          REINICIAR
+        </button>
+      </div>
           </div>
         </div>
       </div>
+
+      {/* Reiniciar button */}
+
     </div>
   );
 }

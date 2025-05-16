@@ -8,7 +8,7 @@ from calculo_medias import (
 import requests
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, cors_allowed_origins="*")  # Enable CORS for all routes
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route("/")
@@ -25,6 +25,8 @@ def simulate_scan(code):
 
 @app.post("/footprint")
 def proxy_footprint():
+
+    print("!!!Footprint endpoint called")
     data = request.get_json()
     if data is None:
         return jsonify({"error": "No JSON received"}), 400
@@ -36,13 +38,28 @@ def proxy_footprint():
     secondary_food = data.get("secondary_food", [])
     appliances = data.get("appliances", [])
 
+
     print(f"Received data: {data}")
     print(f"Appliances: {appliances}")
     print(f"Transport: {transport}")
     print(f"Secondary Transport: {secondary_transport}")
     print(f"Food: {food}")
     print(f"Secondary Food: {secondary_food}")
-    
+
+
+    if not appliances:
+        appliances = []
+    if not secondary_food:
+        secondary_food = []
+    if not secondary_transport:
+        secondary_transport = []
+    if not food:
+        food = "SOJA"
+    if not transport:
+        transport = "ONIBUS"
+    if not estate:
+        estate = "DF"
+
 
     watts = calculate_watts(appliances)
     #calcuate_fuel(transport, secondary_transport)

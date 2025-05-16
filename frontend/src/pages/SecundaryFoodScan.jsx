@@ -9,15 +9,24 @@ import FooterButtons from '../components/FooterButtons';
 
 const categories = ['TRANSPORTE', 'ELETRODOMÉSTICOS', 'ALIMENTAÇÃO'];
 
+// ✅ Only allow valid secondary food codes
+const VALID_FOODS = ['CARNE DE BOI', 'CARNE DE PORCO', 'FRANGO', 'PEIXE', 'SOJA', 'SALADA', 'ARROZ', 'FEIJÃO', 'LEGUMES', 'FRUTAS'];
+
 export default function SecundaryTransportScan() {
     const { answers, update, add_value, remove_value } = useCalc();
     const selected = answers.secundary_food;
     const navigate = useNavigate();
 
     useEffect(() => {
-        socket.on('barcode_scanned', (data) => add_value('secundary_food', data.code));
+        socket.on('barcode_scanned', (data) => {
+            if (VALID_FOODS.includes(data.code)) {
+                add_value('secundary_food', data.code);
+            } else {
+                console.warn(`Código de alimento inválido: ${data.code}`);
+            }
+        });
         return () => socket.off('barcode_scanned');
-    }, [update]);
+    }, [add_value]);
 
     return (
         <div className="border-4 border-[rgb(80,255,40)] flex flex-col h-[85vh] w-[93vw] bg-[#5163b8] text-white">
@@ -40,4 +49,3 @@ export default function SecundaryTransportScan() {
         </div>
     );
 }
-// Compare this snippet from frontend/src/components/FooterButtons.jsx:

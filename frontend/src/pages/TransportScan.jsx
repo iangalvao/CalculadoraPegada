@@ -9,13 +9,22 @@ import FooterButtons from '../components/FooterButtons';
 
 const categories = ['TRANSPORTE', 'ELETRODOMÉSTICOS', 'ALIMENTAÇÃO'];
 
+// ✅ only these bar-codes are considered valid for the “principal transporte”
+const VALID_TRANSPORTS = ['AVIÃO', 'CARRO', 'ÔNIBUS', 'BICICLETA'];
 export default function TransportScan() {
   const { answers, update } = useCalc();
   const selected = answers.transport;
   const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on('barcode_scanned', (data) => update('transport', data.code));
+        socket.on('barcode_scanned', (data) => {
+            if (VALID_TRANSPORTS.includes(data.code)) {
+              update('transport', data.code);
+            } else {
+              // optional: give visual feedback or ignore silently
+              console.warn(`Código de transporte desconhecido: ${data.code}`);
+            }
+          });
     return () => socket.off('barcode_scanned');
   }, [update]);
 

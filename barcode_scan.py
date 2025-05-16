@@ -1,17 +1,15 @@
-from evdev import InputDevice, list_devices
+from evdev import InputDevice, list_devices, ecodes
+from threading import Thread
+from queue import Queue
 import requests
+import time
 
 # Identificador do seu leitor (nome parcial do dispositivo)
 ALVO = "HID 28e9:0380"  # ou apenas "28e9"
 
 # Busca o dispositivo correspondente
 devices = [InputDevice(path) for path in list_devices()]
-leitor = None
-
-for dev in devices:
-    if ALVO.lower() in dev.name.lower():
-        leitor = dev
-        break
+leitor = next((dev for dev in devices if ALVO.lower() in dev.name.lower()), None)
 
 if not leitor:
     print(f"Dispositivo contendo '{ALVO}' não encontrado.")
@@ -33,57 +31,68 @@ key_map = {
     28: 'enter',
 }
 
-buffer = ""
-
+# Mapeamento de códigos para nomes
 mapping = {
-    "10000229":"LEGUMES",
-    "10000113":"AIR-FRIER",
-    "10000090":"AQUECEDOR",
-    "10000175":"ARROZ",
-    "10000007":"AVIÃO",
-    "10000038":"BICICLETA",
-    "10000137":"CARNE DE BOI",
-    "10000144":"CARNE DE PORCO",
-    "10000014":"CARRO",
-    "10000076":"CHUVEIRO ELÉTRICO",
-    "10000083":"DESKTOP",
-    "10000182":"FEIJÃO",
-    "10000151":"FRANGO",
-    "10000212":"FRUTAS",
-    "10000052":"GELADEIRA",
-    "10000120":"LAVA LOUÇAS ",
-    "10000069":"NOTEBOOK",
-    "10000021":"ONIBUS",
-    "10000168":"PEIXE",
-    "10000199":"SALADA",
-    "10000045":"TELEVISÃO"
+    "10000229": "LEGUMES",
+    "10000113": "AIR-FRIER",
+    "10000090": "AQUECEDOR",
+    "10000175": "ARROZ",
+    "10000007": "AVIÃO",
+    "10000038": "BICICLETA",
+    "10000137": "CARNE DE BOI",
+    "10000144": "CARNE DE PORCO",
+    "10000014": "CARRO",
+    "10000076": "CHUVEIRO ELÉTRICO",
+    "10000083": "DESKTOP",
+    "10000182": "FEIJÃO",
+    "10000151": "FRANGO",
+    "10000212": "FRUTAS",
+    "10000052": "GELADEIRA",
+    "10000120": "LAVA LOUÇAS ",
+    "10000069": "NOTEBOOK",
+    "10000021": "ÔNIBUS",
+    "10000168": "PEIXE",
+    "10000199": "SALADA",
+    "10000045": "TELEVISÃO"
 }
 
+buffer = ""
+queue = Queue()
+
+# Thread para envio HTTP
+def sender_thread():
+    while True:
+        raw_code = queue.get()
+        if raw_code is None:
+            break
+
+        barcode = mapping.get(raw_code)
+        if barcode:
+            print(f"Enviando: {barcode}")
+            try:
+                requests.get(f"http://localhost:5174/scan/{barcode}")
+            except Exception as e:
+                print(f"Erro ao enviar: {e}")
+        else:
+            print(f"Código não encontrado: {raw_code}")
+        time.sleep(0.1)  # previne sobrecarga
+
+Thread(target=sender_thread, daemon=True).start()
 
 # Loop de leitura dos eventos
 for event in leitor.read_loop():
-    if event.type == 1:  # EV_KEY
-        if event.value == 1:  # Key down
-            code = event.code
-            char = key_map.get(code)
+    if event.type == ecodes.EV_KEY and event.value == 1:  # key down
+        code = event.code
+        char = key_map.get(code)
 
-            if not char:
-                continue
+        if not char:
+            continue
 
-            if char == "enter":
-                if buffer:
-                    if buffer in mapping:
-                        barcode = mapping[buffer]
-                        print(f"Enviando: {barcode}")
-                    else:
-                        print(f"Código não encontrado: {barcode}")
-                        continue
-                    try:
-                        requests.get(f"http://localhost:5174/scan/{barcode}")
-                    except Exception as e:
-                        print(f"Erro ao enviar: {e}")
-                    buffer = ""
-            elif char == "backspace":
-                buffer = buffer[:-1]
-            else:
-                buffer += char
+        if char == "enter":
+            if buffer:
+                queue.put(buffer)
+                buffer = ""
+        elif char == "backspace":
+            buffer = buffer[:-1]
+        else:
+            buffer += char
