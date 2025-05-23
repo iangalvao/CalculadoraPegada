@@ -19,16 +19,44 @@ print(f"Usando dispositivo: {leitor.name} ({leitor.path})")
 
 # Mapeamento de scancodes para caracteres (sem shift)
 key_map = {
-    2: '1', 3: '2', 4: '3', 5: '4', 6: '5',
-    7: '6', 8: '7', 9: '8', 10: '9', 11: '0',
-    16: 'q', 17: 'w', 18: 'e', 19: 'r', 20: 't',
-    21: 'y', 22: 'u', 23: 'i', 24: 'o', 25: 'p',
-    30: 'a', 31: 's', 32: 'd', 33: 'f', 34: 'g',
-    35: 'h', 36: 'j', 37: 'k', 38: 'l',
-    44: 'z', 45: 'x', 46: 'c', 47: 'v', 48: 'b',
-    49: 'n', 50: 'm',
-    14: 'backspace',
-    28: 'enter',
+    2: "1",
+    3: "2",
+    4: "3",
+    5: "4",
+    6: "5",
+    7: "6",
+    8: "7",
+    9: "8",
+    10: "9",
+    11: "0",
+    16: "q",
+    17: "w",
+    18: "e",
+    19: "r",
+    20: "t",
+    21: "y",
+    22: "u",
+    23: "i",
+    24: "o",
+    25: "p",
+    30: "a",
+    31: "s",
+    32: "d",
+    33: "f",
+    34: "g",
+    35: "h",
+    36: "j",
+    37: "k",
+    38: "l",
+    44: "z",
+    45: "x",
+    46: "c",
+    47: "v",
+    48: "b",
+    49: "n",
+    50: "m",
+    14: "backspace",
+    28: "enter",
 }
 
 # Mapeamento de códigos para nomes
@@ -49,15 +77,17 @@ mapping = {
     "10000212": "FRUTAS",
     "10000052": "GELADEIRA",
     "10000120": "LAVA LOUÇAS ",
+    "10000106": "LAVA ROUPAS",
     "10000069": "NOTEBOOK",
     "10000021": "ÔNIBUS",
     "10000168": "PEIXE",
     "10000199": "SALADA",
-    "10000045": "TELEVISÃO"
+    "10000045": "TELEVISÃO",
 }
 
 buffer = ""
 queue = Queue()
+
 
 # Thread para envio HTTP
 def sender_thread():
@@ -76,6 +106,7 @@ def sender_thread():
         else:
             print(f"Código não encontrado: {raw_code}")
         time.sleep(0.1)  # previne sobrecarga
+
 
 Thread(target=sender_thread, daemon=True).start()
 
