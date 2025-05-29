@@ -12,7 +12,9 @@ export function CalculatorProvider({ children }) {
     food: null,
     secundary_food: [],
     flights: null,
+    weekly_proteins: null,  // <-- ADD THIS
   };
+
 
   const [answers, setAnswers] = useState(defaultAnswers);
 

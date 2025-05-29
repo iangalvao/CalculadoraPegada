@@ -1,19 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-from calculo_medias import (
-    calculate_watts,
-    calculate_meat,
-)
+from calculo_medias import calculate_watts, calculate_meat, calculate_fuel
 import requests
 
 app = Flask(__name__)
 CORS(app, cors_allowed_origins="*")  # Enable CORS for all routes
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+
 @app.route("/")
 def home():
     return "Flask-SocketIO server running!"
+
 
 # send this from barcode handler
 @app.route("/scan/<code>")
@@ -21,7 +20,7 @@ def simulate_scan(code):
     print(f"!!!Read some code: {code}")
     socketio.emit("barcode_scanned", {"code": code})
     return {"status": "sent"}
-    
+
 
 @app.post("/footprint")
 def proxy_footprint():
@@ -33,11 +32,10 @@ def proxy_footprint():
 
     estate = data.get("estate", "DF")
     transport = data.get("transport", "ONIBUS")
-    secondary_transport = data.get("secondary_transport",   [])
+    secondary_transport = data.get("secondary_transport", [])
     food = data.get("food", "SOJA")
     secondary_food = data.get("secondary_food", [])
     appliances = data.get("appliances", [])
-
 
     print(f"Received data: {data}")
     print(f"Appliances: {appliances}")
@@ -45,7 +43,6 @@ def proxy_footprint():
     print(f"Secondary Transport: {secondary_transport}")
     print(f"Food: {food}")
     print(f"Secondary Food: {secondary_food}")
-
 
     if not appliances:
         appliances = []
@@ -60,15 +57,14 @@ def proxy_footprint():
     if not estate:
         estate = "DF"
 
-
-    watts = calculate_watts(appliances)
-    #calcuate_fuel(transport, secondary_transport)
+    watts = calculate_watts(appliances, days=365)
+    fuel = calculate_fuel(transport, secondary_transport)
     foods = calculate_meat(food, secondary_food)
 
     data = {
         "estado": estate,
-        "kwh_mes": 250,
-        "gas": 10,
+        "kwh_mes": watts,
+        "gas": fuel["gas"],
         "boi": foods["CARNE DE BOI"],
         "porco": foods["CARNE DE PORCO"],
         "frango": foods["FRANGO"],
@@ -78,6 +74,7 @@ def proxy_footprint():
         return jsonify(r.json()), r.status_code
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5174, debug=True)

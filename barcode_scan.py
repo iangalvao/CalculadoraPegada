@@ -5,7 +5,7 @@ import requests
 import time
 
 # Identificador do seu leitor (nome parcial do dispositivo)
-ALVO = "HID 28e9:0380"  # ou apenas "28e9"
+ALVO = "HID"  # ou apenas "28e9"
 
 # Busca o dispositivo correspondente
 devices = [InputDevice(path) for path in list_devices()]
@@ -83,6 +83,11 @@ mapping = {
     "10000168": "PEIXE",
     "10000199": "SALADA",
     "10000045": "TELEVISÃO",
+    "7891000248768": "KITKAT",
+    "7896423470994": "TWIX",
+    "7898956381105": "TABACO",
+    "7898950283153": "FILTRO",
+    "7898924491324": "SEDA",
 }
 
 buffer = ""

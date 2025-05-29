@@ -67,8 +67,8 @@ export default function Intro() {
         </div>
         {/* Bottom-right */}
         <div className="border-2 border-[rgb(80,255,40)] flex justify-center items-center h-2/3">
-          <button 
-            onClick={() => nav('/state')} 
+          <button
+            onClick={() => nav('/state')}
             className="text-white font-semibold underline text-4xl hover:text-green-300">
             TOQUE AQUI PARA COMEÇAR
           </button>

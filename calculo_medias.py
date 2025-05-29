@@ -53,7 +53,10 @@ PROTEINS = {"CARNE DE PORCO", "CARNE DE BOI", "FRANGO", "SOJA"}  # accepted keys
 
 
 def calculate_meat(
-    main_food: str, secondary_foods: List[str], total_protein_kg_week: float = 3.5
+    main_food: str,
+    secondary_foods: List[str],
+    total_protein_kg_week: float = 3.5,
+    days: int = 30,
 ) -> Dict[str, float]:
     """
     Split total_protein_kg_week:
@@ -62,6 +65,7 @@ def calculate_meat(
     Foods outside PROTEINS are ignored (they still *reduce* the share for the big 4,
     exactly as you asked).
     """
+    total_protein_kg_week = total_protein_kg_week * days / 30
     main_food = main_food.upper()
     secondary_set = {f.upper() for f in secondary_foods}
 
@@ -80,8 +84,54 @@ def calculate_meat(
         for item in valid_secondaries:
             result[item] = share_each
 
+    # 1) adjust the main protein value if there are no secondaries
+    if not valid_secondaries:
+        result[main_food] = total_protein_kg_week
+
     # 3) values rounded to two decimals for display
     return {k: round(v, 2) for k, v in result.items()}
+
+
+def calculate_fuel(
+    transport: str, secondary_transport: List[str], days: int = 30
+) -> Dict[str, float]:
+    """
+    Calculate fuel consumption based on transport modes. It works similar to the food calculation:
+    • 50 % goes to the main transport
+    • 50 % is divided equally among *valid* secondary transports that are not the main one
+
+    The difference is that the bus and bycicle counts as zero, and thus, the calculation
+    is the base amount of gas divided by the number of transports (main + secondary).
+
+    For base of liters per month, we have:
+       Estimated mean locomotion in the city of Brasília in km: 300 km
+       Average consumption of gasoline in the city of Brasília: 10 km/l
+       Average consumption of gasoline in the city of Brasília in liters: 30 l
+    """
+
+    # Count valid transports
+    base_gas = 30
+    valid_transports = [transport] + [
+        t for t in secondary_transport if t != "BICICLETA" and t != "ONIBUS"
+    ]
+    num_transports = len(valid_transports)
+    if num_transports == 0:
+        return {"gas": 0, "etanol": 0, "diesel": 0}
+    if transport == "BICICLETA" or transport == "ONIBUS":
+        if "CARRO" in valid_transports:
+            gas = (base_gas / 2) / num_transports
+            gas = gas * days / 30
+            return {"gas": gas, "etanol": 0, "diesel": 0}
+    # If the main transport is a car, we just divide the base gas by the number of transports
+    gas = base_gas / num_transports
+    gas = gas * days / 30
+    return {"gas": gas, "etanol": 0, "diesel": 0}
+    # Placeholder implementation
+    return {
+        "gas": 10,
+        "etanol": 5,
+        "diesel": 8,
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -47,6 +47,7 @@ export default function App() {
           <Route path="food" element={<FoodScan />} />
           <Route path="food_secundary" element={<SecundaryFoodScan />} />
           <Route path="results" element={<Results />} />
+          <Route path="foodtable" element={<FoodTable />} />
           {/* <Route path="flights"    element={<AirTravel />}     />
           <Route path="*" element={<Navigate to="/" replace />} /> */}
         </Route>
@@ -62,4 +63,6 @@ const ApplianceScan = React.lazy(() => import('./pages/ApplianceScan'));
 const FoodScan = React.lazy(() => import('./pages/FoodScan'));
 const SecundaryFoodScan = React.lazy(() => import('./pages/SecundaryFoodScan'));
 const Results = React.lazy(() => import('./pages/Results'));
+const FoodTable = React.lazy(() => import('./pages/FoodTable'));
+
 // const AirTravel      = React.lazy(() => import('./pages/AirTravel'));

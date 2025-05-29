@@ -10,7 +10,7 @@ import FooterButtons from '../components/FooterButtons';
 const categories = ['TRANSPORTE', 'ELETRODOMÉSTICOS', 'ALIMENTAÇÃO'];
 
 // ✅ Only allow valid secondary food codes
-const VALID_FOODS = ['CARNE DE BOI', 'CARNE DE PORCO', 'FRANGO', 'PEIXE', 'SOJA', 'SALADA', 'ARROZ', 'FEIJÃO', 'LEGUMES', 'FRUTAS'];
+const VALID_FOODS = ['CARNE DE BOI', 'CARNE DE PORCO', 'FRANGO', 'PEIXE', 'SOJA', 'SALADA', 'KITKAT', 'ARROZ', 'FEIJÃO', 'LEGUMES', 'FRUTAS'];
 
 export default function SecundaryTransportScan() {
     const { answers, update, add_value, remove_value } = useCalc();
